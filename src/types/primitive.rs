@@ -1,5 +1,6 @@
 use super::{DataType, Scalar};
 use crate::error::Error;
+use num_traits::{FromPrimitive, ToPrimitive};
 
 use std::any::type_name;
 use std::{
@@ -279,6 +280,7 @@ macro_rules! primitive_impl {
     };
 
     (String, $struct_name:ident) => {
+
         impl Primitive for $struct_name {
             type RawType = String;
 
@@ -295,6 +297,7 @@ macro_rules! primitive_impl {
     };
 
     ($raw_type:tt, Blob) => {
+
         impl Primitive for Blob {
             type RawType = $raw_type;
 
@@ -360,3 +363,82 @@ for_all_types!(as_mut_impl);
 for_all_types!(from_raw_impl);
 
 for_all_types!(primitive_impl);
+
+macro_rules! to_from_primitive_impl {
+    ($(($raw_type:tt, $struct_name:ident, $enum_name:ident)), *) => {
+        $(
+            impl ToPrimitive for $struct_name {
+                fn to_i64(&self) -> Option<i64> {
+                    self.0.and_then(|v| v.to_i64())
+                }
+
+                fn to_u64(&self) -> Option<u64> {
+                    self.0.and_then(|v| v.to_u64())
+                }
+
+                fn to_f64(&self) -> Option<f64> {
+                    self.0.and_then(|v| v.to_f64())
+                }
+            }
+
+            impl FromPrimitive for $struct_name {
+                fn from_i64(n: i64) -> Option<Self> {
+                    n.to_i64().map(|v| Self(Some(v as $raw_type)))
+                }
+
+                fn from_u64(n: u64) -> Option<Self> {
+                    n.to_u64().map(|v| Self(Some(v as $raw_type)))
+                }
+
+                fn from_f64(n: f64) -> Option<Self> {
+                    n.to_f64().map(|v| Self(Some(v as $raw_type)))
+                }
+            }
+        )*
+    };
+}
+
+// Implement for integer types
+to_from_primitive_impl!(
+    (i8, Char, Char),
+    (i16, Short, Short),
+    (i32, Int, Int),
+    (i64, Long, Long)
+);
+
+macro_rules! to_from_primitive_float_impl {
+    ($(($raw_type:tt, $struct_name:ident, $enum_name:ident)), *) => {
+        $(
+            impl ToPrimitive for $struct_name {
+                fn to_i64(&self) -> Option<i64> {
+                    self.0.and_then(|v| v.to_i64())
+                }
+
+                fn to_u64(&self) -> Option<u64> {
+                    self.0.and_then(|v| v.to_u64())
+                }
+
+                fn to_f64(&self) -> Option<f64> {
+                    self.0.map(|v| v as f64)
+                }
+            }
+
+            impl FromPrimitive for $struct_name {
+                fn from_i64(n: i64) -> Option<Self> {
+                    n.to_f64().map(|v| Self(Some(v as $raw_type)))
+                }
+
+                fn from_u64(n: u64) -> Option<Self> {
+                    n.to_f64().map(|v| Self(Some(v as $raw_type)))
+                }
+
+                fn from_f64(n: f64) -> Option<Self> {
+                    Some(Self(Some(n as $raw_type)))
+                }
+            }
+        )*
+    };
+}
+
+// Implement for float types
+to_from_primitive_float_impl!((f32, Float, Float), (f64, Double, Double));
