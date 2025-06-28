@@ -7,8 +7,8 @@ use crate::{error::Error, types::*};
 use super::Client;
 
 /// This is a simple buffer for tableInsert
-pub struct TableWriter {
-    client: Client,
+pub struct TableWriter<'a> {
+    client: &'a mut Client,
     table_name: String,
     script: String,
     columns: Vec<VectorImpl>,
@@ -22,7 +22,7 @@ pub struct TableWriter {
 /// TableWriter is a simple buffer for tableInsert.
 ///
 /// Partitioned tables are not supported.
-impl TableWriter {
+impl<'a> TableWriter<'a> {
     /// Creates a `TableWriter`.
     ///
     /// This function will try to get the table's schema through client,
@@ -40,7 +40,7 @@ impl TableWriter {
     ///     let mut table = TableWriter::new(client, "test_table", 512);
     /// }
     /// ```
-    pub async fn new(mut client: Client, table_name: &str, batch_size: u32) -> Self {
+    pub async fn new(client: &'a mut Client, table_name: &str, batch_size: u32) -> Self {
         if batch_size == 0 {
             panic!("TableWriter: batch_size must be positive.");
         }
@@ -226,7 +226,7 @@ impl TableWriter {
     }
 }
 
-impl Drop for TableWriter {
+impl Drop for TableWriter<'_> {
     fn drop(&mut self) {
         block_in_place(|| {
             Handle::current().block_on(async move {
