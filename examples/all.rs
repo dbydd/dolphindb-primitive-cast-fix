@@ -14,8 +14,17 @@ use futures::StreamExt;
 
 // ==================== type_conversion.rs ====================
 async fn test_type_conversion() {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").unwrap_or_else(|_| {
+        panic!("请设置 DOLPHIN_DB_CONNECT 环境变量，格式：username@password@host:port")
+    });
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    if parts.len() != 3 {
+        panic!("无效的连接字符串格式，应为 username@password@host:port");
+    }
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
     let mut variables: HashMap<String, ConstantImpl> = HashMap::new();
 
@@ -125,8 +134,17 @@ async fn test_type_conversion() {
 
 // ==================== table_insert.rs ====================
 async fn test_table_insert() -> Result<(), Error> {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").unwrap_or_else(|_| {
+        panic!("请设置 DOLPHIN_DB_CONNECT 环境变量，格式：username@password@host:port")
+    });
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    if parts.len() != 3 {
+        panic!("无效的连接字符串格式，应为 username@password@host:port");
+    }
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
 
     let mut prices = DoubleArrayVector::new();
