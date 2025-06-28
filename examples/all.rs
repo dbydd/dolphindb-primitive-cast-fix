@@ -183,8 +183,11 @@ async fn test_table_insert() -> Result<(), Error> {
 
 // ==================== any_vector.rs ====================
 async fn test_any_vector() {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").expect("请设置 DOLPHIN_DB_CONNECT 环境变量");
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
 
     let mut v: Vector<Any> = Vector::new();
@@ -248,8 +251,11 @@ async fn test_subscribe(action: String) {
 
 // ==================== quick_start.rs ====================
 async fn test_quick_start() {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").expect("请设置 DOLPHIN_DB_CONNECT 环境变量");
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
 
     // 执行脚本
@@ -289,8 +295,11 @@ async fn test_quick_start() {
 
 // ==================== table_writer.rs ====================
 async fn test_table_writer() -> Result<(), Error> {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").expect("请设置 DOLPHIN_DB_CONNECT 环境变量");
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
 
     // 创建流表
@@ -364,8 +373,11 @@ async fn test_table_writer() -> Result<(), Error> {
 
 // ==================== symbol_vector.rs ====================
 async fn test_symbol_vector() {
-    let mut builder = ClientBuilder::new("127.0.0.1:8848");
-    builder.with_auth(("admin", "123456"));
+    let conn_str = std::env::var("DOLPHIN_DB_CONNECT").expect("请设置 DOLPHIN_DB_CONNECT 环境变量");
+    let parts: Vec<&str> = conn_str.split('@').collect();
+    let (username, password, host_port) = (parts[0], parts[1], parts[2]);
+    let mut builder = ClientBuilder::new(host_port);
+    builder.with_auth((username, password));
     let mut client = builder.connect().await.unwrap();
 
     let res = client.run_script("a = symbol(`a`b`c)").await.unwrap();
