@@ -1,4 +1,9 @@
-use dolphindb::{client::ClientBuilder, error::Error, types::*};
+use dolphindb::{
+    client::{ClientBuilder, TableWriter},
+    error::Error,
+    stream_client::{request::Request, subscriber::SubscriberBuilder},
+    types::*,
+};
 use std::collections::HashMap;
 use chrono::{NaiveDateTime, Utc};
 use tokio::{
